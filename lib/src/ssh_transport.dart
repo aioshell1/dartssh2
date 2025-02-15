@@ -36,9 +36,11 @@ typedef SSHPrintHandler = void Function(String?);
 /// Function called when host key is received.
 /// [type] is the type of the host key, For example 'ssh-rsa',
 /// [fingerprint] md5 fingerprint of the host key.
+/// [hostkey] is the raw public key BLOB in SSH binary format, which can be used to compute custom fingerprints (e.g., MD5, SHA256) or for other validation purposes.
 typedef SSHHostkeyVerifyHandler = FutureOr<bool> Function(
   String type,
   Uint8List fingerprint,
+  Uint8List hostkey,
 );
 
 typedef SSHTransportReadyHandler = void Function();
@@ -827,7 +829,7 @@ class SSHTransport {
     }
 
     final userVerified = onVerifyHostKey != null
-        ? onVerifyHostKey!(_hostkeyType!.name, fingerprint)
+        ? onVerifyHostKey!(_hostkeyType!.name, fingerprint, hostkey)
         : true;
 
     Future.value(userVerified).then(
